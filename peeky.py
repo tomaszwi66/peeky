@@ -9,10 +9,28 @@ Modes: voice, screen capture, camera, clipboard, text input, Video Coach.
 Works fully offline once the local models are installed.
 """
 
-import tkinter as tk
-from tkinter import scrolledtext
 import threading, wave, tempfile, os, sys, asyncio, time, socket
 import base64, io, re, subprocess, unicodedata, logging, ctypes, json
+
+# === DPI awareness ===========================================================
+# MUST run BEFORE tkinter is imported, otherwise screen-capture coordinates
+# get mismatched on monitors with non-100% display scaling. tkinter would
+# report logical coords while ImageGrab expects physical coords, so the
+# captured region drifts away from the rectangle the user actually drew.
+def _enable_dpi_awareness():
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)   # per-monitor v2
+        return
+    except (AttributeError, OSError):
+        pass
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()        # system DPI aware
+    except (AttributeError, OSError):
+        pass
+_enable_dpi_awareness()
+
+import tkinter as tk
+from tkinter import scrolledtext
 
 # === Logging ===
 HERE        = os.path.dirname(os.path.abspath(__file__))
