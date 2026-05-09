@@ -133,10 +133,12 @@ In-file constants:
 
 ```
 peeky.py             main application
+peeky_icon.ico       application icon
 README.md            this file
 requirements.txt     Python dependencies
 LICENSE              MIT license
 .gitignore
+docs/assets/         screenshots used in this README
 peeky.log            runtime log, rewritten on each launch
 memory.json          interaction timeline (created on first reply)
 coach_state.json     transient state during a Video Coach session

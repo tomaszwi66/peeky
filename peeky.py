@@ -37,6 +37,7 @@ HERE        = os.path.dirname(os.path.abspath(__file__))
 LOG_FILE    = os.path.join(HERE, "peeky.log")
 MEMORY_FILE = os.path.join(HERE, "memory.json")
 COACH_FILE  = os.path.join(HERE, "coach_state.json")
+ICON_FILE   = os.path.join(HERE, "peeky_icon.ico")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -419,6 +420,11 @@ class PeekyAgent:
         # tk's default scaling is 1.333 for 96 DPI. Adjust proportionally.
         self.root.tk.call("tk", "scaling", self._scale * 1.333)
         self.root.title("Peeky")
+        if os.path.exists(ICON_FILE):
+            try:
+                self.root.iconbitmap(default=ICON_FILE)
+            except Exception as e:
+                log.warning("iconbitmap: %s", e)
         self.root.overrideredirect(True)
         self.root.wm_attributes("-topmost", True)
         self.root.wm_attributes("-alpha", 0.96)
