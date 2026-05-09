@@ -1,0 +1,37 @@
+# Runtime files
+peeky.log
+memory.json
+coach_state.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temp
+*.tmp
+*.wav
+*.mp3
+*.jpg
+*.png
+!docs/**/*.png
+!docs/**/*.jpg
