@@ -5,18 +5,16 @@
 Peeky is your AI sidekick for the desktop. A small widget that lives in the corner of your screen, watches what you point it at, listens to what you ask, and answers out loud. Everything is processed locally by Ollama. Nothing leaves your machine unless you explicitly choose the online speech services.
 
 <p align="center">
-  <img src="docs/assets/widget.png" alt="Peeky widget" width="200" />
-  &nbsp;&nbsp;
-  <img src="docs/assets/bubble.png" alt="Reply bubble" width="420" />
+  <img src="docs/assets/peeky_1.png" alt="Peeky widget with reply bubble" width="640" />
 </p>
 
-<p align="center">
-  <img src="docs/assets/screen-mode.png" alt="Screen capture mode" width="640" />
-</p>
+*Talk to Peeky out loud. Click the agent, say what you need, click again to stop. The reply appears in the bubble and is spoken back to you.*
 
 <p align="center">
-  <img src="docs/assets/video-coach.png" alt="Video Coach" width="640" />
+  <img src="docs/assets/peeky_2.png" alt="Peeky describing a captured image" width="640" />
 </p>
+
+*Show Peeky anything on screen: a chart, a diagram, a photo, a slide. Drag a rectangle around it, ask a question, and Peeky describes or analyzes what you selected. The whole pipeline runs locally through Ollama, so it works offline.*
 
 ## Features
 
