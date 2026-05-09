@@ -118,15 +118,15 @@ EMOJI_MAP = {
 
 # === Configuration ===
 # Peeky needs a multimodal Ollama model (text + vision).
-# Pick one and pull it before running:
-#     ollama pull gemma3n:e4b     (Gemma 3n, 4B effective, recommended)
+# Recommended:
+#     ollama pull gemma4:e4b      (Gemma multimodal, 4B effective)
+# Other compatible options if you prefer:
 #     ollama pull qwen2.5vl:3b    (Qwen vision, smaller and faster)
 #     ollama pull llava           (LLaVA, classic vision model)
 #
 # At startup Peeky picks the first one that is actually installed locally.
 # Override the choice with the PEEKY_MODEL environment variable.
 PREFERRED_MODELS = [
-    "gemma3n:e4b",
     "gemma4:e4b",
     "qwen2.5vl:7b",
     "qwen2.5vl:3b",

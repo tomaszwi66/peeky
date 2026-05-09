@@ -41,7 +41,7 @@ if errorlevel 1 (
 )
 
 echo [2/3] Pulling the multimodal model ^(about 3 GB, this may take a while^)...
-ollama pull gemma3n:e4b
+ollama pull gemma4:e4b
 if errorlevel 1 (
     echo.
     echo Model pull failed. Check your internet connection and try again.

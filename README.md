@@ -70,7 +70,7 @@ install.bat
 run.bat
 ```
 
-`install.bat` pulls the Python dependencies and the `gemma3n:e4b` model (about 3 GB). The first launch also downloads the faster-whisper base model (about 140 MB) for offline speech recognition. After that, everything is cached locally.
+`install.bat` pulls the Python dependencies and the `gemma4:e4b` model (about 3 GB). The first launch also downloads the faster-whisper base model (about 140 MB) for offline speech recognition. After that, everything is cached locally.
 
 ### Manual installation
 
@@ -78,7 +78,7 @@ If you prefer to do it by hand:
 
 ```powershell
 pip install -r requirements.txt
-ollama pull gemma3n:e4b
+ollama pull gemma4:e4b
 python peeky.py
 ```
 
@@ -135,7 +135,7 @@ You can configure Peeky through environment variables, or by editing the constan
 
 | Variable          | Default            | Notes                                              |
 |-------------------|--------------------|----------------------------------------------------|
-| `PEEKY_MODEL`     | auto-detect        | Forces a specific multimodal Ollama model. If unset, Peeky picks the first available one (preferring `gemma3n:e4b`). |
+| `PEEKY_MODEL`     | auto-detect        | Forces a specific multimodal Ollama model. If unset, Peeky picks the first available one (preferring `gemma4:e4b`). |
 
 In-file constants:
 
