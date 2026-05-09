@@ -4,6 +4,20 @@
 
 Peeky is your AI sidekick for the desktop. A small widget that lives in the corner of your screen, watches what you point it at, listens to what you ask, and answers out loud. Everything is processed locally by Ollama. Nothing leaves your machine unless you explicitly choose the online speech services.
 
+<p align="center">
+  <img src="docs/assets/widget.png" alt="Peeky widget" width="200" />
+  &nbsp;&nbsp;
+  <img src="docs/assets/bubble.png" alt="Reply bubble" width="420" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/screen-mode.png" alt="Screen capture mode" width="640" />
+</p>
+
+<p align="center">
+  <img src="docs/assets/video-coach.png" alt="Video Coach" width="640" />
+</p>
+
 ## Features
 
 * **Voice conversations** in plain English. Speech recognition through Google when online, faster-whisper when offline. Voice replies through edge-tts when online, the Windows SAPI Zira voice when offline.
@@ -46,7 +60,7 @@ cd peeky
 pip install -r requirements.txt
 
 # 3. Pull a multimodal model in Ollama
-ollama pull gemma3n:e4b
+ollama pull gemma4:e4b
 
 # 4. Run
 python peeky.py
@@ -105,7 +119,7 @@ You can configure Peeky through environment variables, or by editing the constan
 
 | Variable          | Default            | Notes                                              |
 |-------------------|--------------------|----------------------------------------------------|
-| `PEEKY_MODEL`     | `gemma3n:e4b`      | Any multimodal Ollama model. Try `llava` for vision-only tasks. |
+| `PEEKY_MODEL`     | `gemma4:e4b`      | Any multimodal Ollama model. Try `llava` for vision-only tasks. |
 
 In-file constants:
 
@@ -143,7 +157,7 @@ coach_state.json     transient state during a Video Coach session
 
 **"Ollama is not running."** Start the Ollama desktop app or run `ollama serve` in a terminal.
 
-**Model does not see images.** Make sure the configured model is multimodal. Text-only models silently ignore images. `gemma3n:e4b`, `llava`, and `bakllava` all support vision.
+**Model does not see images.** Make sure the configured model is multimodal. Text-only models silently ignore images. `gemma4:e4b`, `llava`, and `bakllava` all support vision.
 
 **No microphone detected.** Open Windows Settings > Privacy & security > Microphone, and allow desktop apps to use it.
 

@@ -98,10 +98,12 @@ EMOJI_MAP = {
 }
 
 # === Configuration ===
-# Default model. Change here or via the OLLAMA_MODEL environment variable.
-# The default is multimodal (text + vision). Pull it with:
-#     ollama pull gemma3n:e4b
-OLLAMA_MODEL  = os.environ.get("PEEKY_MODEL", "gemma3n:e4b")
+# Default model. Change here or via the PEEKY_MODEL environment variable.
+# Must be a multimodal Ollama model (text + vision). Examples that work well:
+#     ollama pull gemma4:e4b      (Gemma multimodal)
+#     ollama pull qwen2.5vl:7b    (Qwen vision)
+#     ollama pull llava           (LLaVA)
+OLLAMA_MODEL  = os.environ.get("PEEKY_MODEL", "gemma4:e4b")
 
 TTS_VOICE_ON  = "en-US-AriaNeural"   # edge-tts (online)
 TTS_VOICE_OFF = "Zira"               # Windows SAPI fallback (offline)
