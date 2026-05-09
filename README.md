@@ -50,27 +50,45 @@ A two-second connectivity probe runs at the start of every speech-to-text and te
 
 ## Installation
 
+You need three things installed first:
+
+1. **Python 3.10 or newer.** Download from [python.org](https://www.python.org/downloads/). On the installer screen, tick **"Add Python to PATH"**.
+2. **Ollama.** Download from [ollama.com](https://ollama.com) and run the installer.
+3. **A microphone.** Open Windows Settings, search for "microphone privacy", and make sure "Let desktop apps access your microphone" is on.
+
+Then:
+
 ```powershell
 # 1. Clone or download this repository
+git clone https://github.com/tomaszwi66/peeky.git
 cd peeky
 
-# 2. Install Python dependencies
+# 2. Run the one-click setup script
+install.bat
+
+# 3. Launch
+run.bat
+```
+
+`install.bat` pulls the Python dependencies and the `gemma3n:e4b` model (about 3 GB). The first launch also downloads the faster-whisper base model (about 140 MB) for offline speech recognition. After that, everything is cached locally.
+
+### Manual installation
+
+If you prefer to do it by hand:
+
+```powershell
 pip install -r requirements.txt
-
-# 3. Pull a multimodal model in Ollama
-ollama pull gemma4:e4b
-
-# 4. Run
+ollama pull gemma3n:e4b
 python peeky.py
 ```
 
-The first launch downloads the faster-whisper base model (about 140 MB) in the background. Once it is cached, future launches start instantly.
+### Using a different model
 
-If `pyaudio` fails to install through pip, install it from a wheel:
+Peeky picks any installed multimodal model on startup. To force a specific one:
 
 ```powershell
-pip install pipwin
-pipwin install pyaudio
+set PEEKY_MODEL=qwen2.5vl:7b
+python peeky.py
 ```
 
 ## Usage
@@ -117,7 +135,7 @@ You can configure Peeky through environment variables, or by editing the constan
 
 | Variable          | Default            | Notes                                              |
 |-------------------|--------------------|----------------------------------------------------|
-| `PEEKY_MODEL`     | `gemma4:e4b`      | Any multimodal Ollama model. Try `llava` for vision-only tasks. |
+| `PEEKY_MODEL`     | auto-detect        | Forces a specific multimodal Ollama model. If unset, Peeky picks the first available one (preferring `gemma3n:e4b`). |
 
 In-file constants:
 
@@ -134,6 +152,8 @@ In-file constants:
 ```
 peeky.py             main application
 peeky_icon.ico       application icon
+install.bat          one-click setup for Windows
+run.bat              one-click launch for Windows
 README.md            this file
 requirements.txt     Python dependencies
 LICENSE              MIT license

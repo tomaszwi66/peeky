@@ -117,12 +117,45 @@ EMOJI_MAP = {
 }
 
 # === Configuration ===
-# Default model. Change here or via the PEEKY_MODEL environment variable.
-# Must be a multimodal Ollama model (text + vision). Examples that work well:
-#     ollama pull gemma4:e4b      (Gemma multimodal)
-#     ollama pull qwen2.5vl:7b    (Qwen vision)
-#     ollama pull llava           (LLaVA)
-OLLAMA_MODEL  = os.environ.get("PEEKY_MODEL", "gemma4:e4b")
+# Peeky needs a multimodal Ollama model (text + vision).
+# Pick one and pull it before running:
+#     ollama pull gemma3n:e4b     (Gemma 3n, 4B effective, recommended)
+#     ollama pull qwen2.5vl:3b    (Qwen vision, smaller and faster)
+#     ollama pull llava           (LLaVA, classic vision model)
+#
+# At startup Peeky picks the first one that is actually installed locally.
+# Override the choice with the PEEKY_MODEL environment variable.
+PREFERRED_MODELS = [
+    "gemma3n:e4b",
+    "gemma4:e4b",
+    "qwen2.5vl:7b",
+    "qwen2.5vl:3b",
+    "llava:latest",
+    "llava",
+    "bakllava",
+]
+
+def _resolve_model() -> str:
+    """Pick the configured model, or auto-detect a multimodal model."""
+    env = os.environ.get("PEEKY_MODEL")
+    if env:
+        return env
+    try:
+        installed = [m.get("model", m.get("name", ""))
+                     for m in ollama.list().get("models", [])]
+        for name in PREFERRED_MODELS:
+            if name in installed:
+                return name
+        for name in PREFERRED_MODELS:
+            short = name.split(":")[0]
+            for m in installed:
+                if m.startswith(short + ":"):
+                    return m
+    except Exception as e:
+        log.warning("Could not list Ollama models: %s", e)
+    return PREFERRED_MODELS[0]
+
+OLLAMA_MODEL = _resolve_model()
 
 TTS_VOICE_ON  = "en-US-AriaNeural"   # edge-tts (online)
 TTS_VOICE_OFF = "Zira"               # Windows SAPI fallback (offline)
