@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/peeky_banner.png" alt="Peeky banner" width="100%" />
+  <img src="docs/assets/peeky.png" alt="Peeky banner" width="100%" />
 </p>
 
 # Peeky
