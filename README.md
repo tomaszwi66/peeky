@@ -1,20 +1,12 @@
+<p align="center">
+  <img src="docs/assets/peeky_banner.png" alt="Peeky banner" width="100%" />
+</p>
+
 # Peeky
 
 **See. Think. Help.**
 
 Peeky is your AI sidekick for the desktop. A small widget that lives in the corner of your screen, watches what you point it at, listens to what you ask, and answers out loud. Everything is processed locally by Ollama. Nothing leaves your machine unless you explicitly choose the online speech services.
-
-<p align="center">
-  <img src="docs/assets/peeky_1.png" alt="Peeky widget with reply bubble" width="640" />
-</p>
-
-*Talk to Peeky out loud. Click the agent, say what you need, click again to stop. The reply appears in the bubble and is spoken back to you.*
-
-<p align="center">
-  <img src="docs/assets/peeky_2.png" alt="Peeky describing a captured image" width="640" />
-</p>
-
-*Show Peeky anything on screen: a chart, a diagram, a photo, a slide. Drag a rectangle around it, ask a question, and Peeky describes or analyzes what you selected. The whole pipeline runs locally through Ollama, so it works offline.*
 
 ## Features
 
@@ -27,6 +19,20 @@ Peeky is your AI sidekick for the desktop. A small widget that lives in the corn
 * **Memory timeline.** Every interaction is timestamped and stored locally. Browse the history through the right-click menu.
 * **Always-on-top widget.** Drag it anywhere. Stays out of the way until you click it.
 * **Fully offline operation.** With one local model and faster-whisper installed, the entire stack runs without an internet connection.
+
+## Peeky in action
+
+<p align="center">
+  <img src="docs/assets/peeky_1.png" alt="Peeky widget with reply bubble" width="640" />
+</p>
+
+*Talk to Peeky out loud. Click the agent, say what you need, click again to stop. The reply appears in the bubble and is spoken back to you.*
+
+<p align="center">
+  <img src="docs/assets/peeky_2.png" alt="Peeky describing a captured image" width="640" />
+</p>
+
+*Show Peeky anything on screen: a chart, a diagram, a photo, a slide. Drag a rectangle around it, ask a question, and Peeky describes or analyzes what you selected. The whole pipeline runs locally through Ollama, so it works offline too.*
 
 ## How it works
 
