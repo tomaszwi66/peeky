@@ -384,14 +384,40 @@ class ScreenSelector:
 
 
 # ======================================================================
+def _system_dpi_scale() -> float:
+    """Display scale factor (1.0 = 100%, 1.5 = 150%, etc.)."""
+    try:
+        hdc = ctypes.windll.user32.GetDC(0)
+        dpi = ctypes.windll.gdi32.GetDeviceCaps(hdc, 88)  # LOGPIXELSX
+        ctypes.windll.user32.ReleaseDC(0, hdc)
+        return max(1.0, dpi / 96.0)
+    except Exception:
+        return 1.0
+
+
 class PeekyAgent:
     """Main desktop agent window."""
 
-    WIN_W = 160
-    WIN_H = 258
+    BASE_W = 160
+    BASE_H = 258
+    BASE_BUBBLE_W = 420
 
     def __init__(self):
+        # Compute DPI scale once and apply it consistently across the UI.
+        # tkinter without explicit scaling renders at physical pixels when
+        # the process is DPI-aware, which makes everything tiny on hi-res
+        # displays. We multiply window/bubble sizes and ask tk to scale
+        # font point sizes accordingly.
+        self._scale = _system_dpi_scale()
+        self.WIN_W = int(self.BASE_W * self._scale)
+        self.WIN_H = int(self.BASE_H * self._scale)
+
+        global BUBBLE_W
+        BUBBLE_W = int(self.BASE_BUBBLE_W * self._scale)
+
         self.root = tk.Tk()
+        # tk's default scaling is 1.333 for 96 DPI. Adjust proportionally.
+        self.root.tk.call("tk", "scaling", self._scale * 1.333)
         self.root.title("Peeky")
         self.root.overrideredirect(True)
         self.root.wm_attributes("-topmost", True)
