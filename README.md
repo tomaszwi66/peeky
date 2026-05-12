@@ -1,5 +1,3 @@
-🚀 Official launch: Tuesday, May 12th, 15:00 CEST. If you're here early, feel free to explore and leave a ⭐!
-
 <p align="center">
   <img src="docs/assets/peeky.png" alt="Peeky banner" width="100%" />
 </p>
