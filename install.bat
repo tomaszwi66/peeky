@@ -40,7 +40,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [2/3] Pulling the multimodal model ^(about 3 GB, this may take a while^)...
+echo [2/3] Pulling models...
+echo       - gemma4:e4b  ^(multimodal vision model, ~3 GB^)
 ollama pull gemma4:e4b
 if errorlevel 1 (
     echo.
@@ -49,10 +50,32 @@ if errorlevel 1 (
     exit /b 1
 )
 echo.
-
-echo [3/3] Done.
+echo       - nomic-embed-text  ^(embedding model for document RAG, ~270 MB^)
+ollama pull nomic-embed-text
+if errorlevel 1 (
+    echo   Warning: embedding model could not be pulled. Document RAG will use
+    echo   keyword matching as a fallback. You can pull it later with:
+    echo     ollama pull nomic-embed-text
+)
 echo.
-echo Launch Peeky with: run.bat
+
+echo [3/3] Creating desktop shortcut...
+powershell -NoProfile -Command ^
+  "$ws = New-Object -ComObject WScript.Shell; ^
+   $s = $ws.CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Peeky.lnk'); ^
+   $s.TargetPath = '%~dp0run.bat'; ^
+   $s.WorkingDirectory = '%~dp0'; ^
+   $s.IconLocation = '%~dp0peeky_icon.ico'; ^
+   $s.Description = 'Peeky - AI desktop sidekick'; ^
+   $s.Save()"
+if errorlevel 1 (
+    echo   Warning: could not create desktop shortcut. Run run.bat manually.
+) else (
+    echo   Shortcut created on the desktop.
+)
+echo.
+
+echo Done. Double-click Peeky on your desktop to launch.
 echo.
 pause
 endlocal
