@@ -63,7 +63,8 @@ echo [3/3] Creating desktop shortcut...
 powershell -NoProfile -Command ^
   "$ws = New-Object -ComObject WScript.Shell; ^
    $s = $ws.CreateShortcut([Environment]::GetFolderPath('Desktop') + '\Peeky.lnk'); ^
-   $s.TargetPath = '%~dp0run.bat'; ^
+   $s.TargetPath = 'wscript.exe'; ^
+   $s.Arguments = '\"' + '%~dp0launch.vbs' + '\"'; ^
    $s.WorkingDirectory = '%~dp0'; ^
    $s.IconLocation = '%~dp0peeky_icon.ico'; ^
    $s.Description = 'Peeky - AI desktop sidekick'; ^
