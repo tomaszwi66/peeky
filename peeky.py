@@ -485,7 +485,13 @@ class PeekyAgent:
             "embed_model", "nomic-embed-text"))
 
         self.root = tk.Tk()
-        # tk's default scaling is 1.333 for 96 DPI. Adjust proportionally.
+        # Triple-hide before any rendering: withdraw + alpha=0 + off-screen.
+        # Tkinter creates the native window before Python runs withdraw(), so
+        # without this the default grey window flashes for one frame.
+        self.root.withdraw()
+        self.root.wm_attributes("-alpha", 0)
+        self.root.geometry("+99999+99999")
+
         self.root.tk.call("tk", "scaling", self._scale * 1.333)
         self.root.title("Peeky")
         if os.path.exists(ICON_FILE):
@@ -495,7 +501,6 @@ class PeekyAgent:
                 log.warning("iconbitmap: %s", e)
         self.root.overrideredirect(True)
         self.root.wm_attributes("-topmost", True)
-        self.root.wm_attributes("-alpha", float(self.settings.get("alpha", 0.96)))
         self.root.configure(bg=BG)
 
         self.state = "idle"
@@ -534,7 +539,10 @@ class PeekyAgent:
 
         self.root.update_idletasks()
         self._hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
-        self.root.after(80, lambda: round_corners(self._hwnd))
+        round_corners(self._hwnd)
+        # Now reveal: move to correct position, restore alpha, show.
+        self.root.deiconify()
+        self.root.wm_attributes("-alpha", float(self.settings.get("alpha", 0.96)))
 
         self.root.bind("<Escape>", self._on_escape)
 
