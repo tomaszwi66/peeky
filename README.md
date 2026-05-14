@@ -13,7 +13,7 @@ Peeky is your AI sidekick for the desktop. A small widget that lives in the corn
 This version brings three improvements over the original release:
 
 - **Ask about any document.** Right-click the widget and choose Attach document to load a text file or PDF. Peeky reads it, breaks it into chunks, and uses it to answer your questions - all locally, no cloud involved. The document is kept only in memory and disappears when you close the app.
-- **Type mode fixed.** Press Enter to send a typed question. Shift+Enter adds a new line. The Send button is now clearly visible.
+- **Type mode fixed.** Press Enter to send a typed question. Shift+Enter adds a new line.
 - **Settings panel.** Right-click the widget and open Settings to control how many document chunks are sent with each question.
 
 ## Features
