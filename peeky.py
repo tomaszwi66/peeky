@@ -30,7 +30,10 @@ def _enable_dpi_awareness():
 _enable_dpi_awareness()
 
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import scrolledtext, filedialog
+
+from peeky_settings import load_settings, save_settings, SettingsDialog
+from peeky_rag import EphemeralRAG
 
 # === Logging ===
 HERE        = os.path.dirname(os.path.abspath(__file__))
@@ -324,38 +327,62 @@ class TextInputDialog:
         dlg.configure(bg=BG)
         dlg.wm_attributes("-topmost", True)
         dlg.wm_attributes("-alpha", 0.97)
+        dlg.transient(root)
         dlg.grab_set(); dlg.resizable(False, False)
 
         tk.Label(dlg, text="Type your question:", font=("Segoe UI", 10),
                  bg=BG, fg=TEXT_LO).pack(anchor="w", padx=14, pady=(12, 3))
         entry = tk.Text(dlg, font=("Segoe UI", 10), width=44, height=4,
                         bg=SURFACE, fg=TEXT_HI, insertbackground=ACCENT["idle"],
-                        wrap="word", relief="flat", bd=0, padx=10, pady=8)
-        entry.pack(padx=12, pady=(0, 4)); entry.focus_set()
+                        wrap="word", relief="flat", bd=0, padx=10, pady=8,
+                        highlightthickness=1, highlightbackground=BORDER,
+                        highlightcolor=ACCENT["idle"])
+        entry.pack(padx=12, pady=(0, 4)); entry.focus_force()
 
         def ok(_=None):
             result["text"] = entry.get("1.0", "end").strip() or None
             dlg.destroy()
+            return "break"
+        def newline(_=None):
+            entry.insert("insert", "\n")
+            return "break"
         def cancel(_=None): dlg.destroy()
-        entry.bind("<Control-Return>", ok)
-        entry.bind("<Escape>", cancel)
 
-        bf = tk.Frame(dlg, bg=BG); bf.pack(pady=(4, 12))
+        # Plain Enter sends; Shift+Enter inserts a newline. Ctrl+Enter kept for
+        # muscle memory. The previous build only bound Ctrl+Enter which is why
+        # users could not figure out how to send.
+        entry.bind("<Return>",          ok)
+        entry.bind("<KP_Enter>",        ok)
+        entry.bind("<Shift-Return>",    newline)
+        entry.bind("<Control-Return>",  ok)
+        entry.bind("<Escape>",          cancel)
 
-        def btn(txt, cmd, primary=False):
-            bg = ACCENT["idle"] if primary else SURFACE
-            fg = "white" if primary else TEXT_HI
-            b = tk.Button(bf, text=txt, command=cmd, font=("Segoe UI", 9),
-                          padx=12, pady=5, bg=bg, fg=fg, relief="flat",
-                          activebackground=BORDER, cursor="hand2", bd=0)
-            b.pack(side="left", padx=4)
+        hint = tk.Label(dlg, text="Enter = send   ·   Shift+Enter = new line   ·   Esc = cancel",
+                        font=("Segoe UI", 8), bg=BG, fg=TEXT_LO)
+        hint.pack(anchor="w", padx=14, pady=(0, 4))
 
-        btn("Send  (Ctrl+Enter)", ok, True)
-        btn("Cancel", cancel)
+        bf = tk.Frame(dlg, bg=BG); bf.pack(pady=(2, 14), padx=12, fill="x")
 
-        w, h = 400, 188
+        cancel_btn = tk.Button(bf, text="Cancel", command=cancel,
+                               font=("Segoe UI", 9), padx=14, pady=7,
+                               bg=SURFACE, fg=TEXT_HI, relief="flat",
+                               activebackground=BORDER, cursor="hand2", bd=0,
+                               highlightbackground=BORDER, highlightthickness=1)
+        cancel_btn.pack(side="left")
+
+        send_btn = tk.Button(bf, text="  Send  ▶", command=ok,
+                             font=("Segoe UI", 10, "bold"), padx=20, pady=7,
+                             bg=ACCENT["idle"], fg="white", relief="flat",
+                             activebackground=ACCENT["speaking"],
+                             activeforeground="white",
+                             cursor="hand2", bd=0)
+        send_btn.pack(side="right")
+
+        w, h = 420, 220
         sw, sh = root.winfo_screenwidth(), root.winfo_screenheight()
         dlg.geometry(f"{w}x{h}+{(sw-w)//2}+{(sh-h)//2}")
+        dlg.lift()
+        dlg.after(50, lambda: entry.focus_force())
         root.wait_window(dlg)
         return result["text"]
 
@@ -437,6 +464,10 @@ class PeekyAgent:
     BASE_BUBBLE_W = 420
 
     def __init__(self):
+        # User settings (size %, alpha, theme, RAG params). Persisted to
+        # settings.json so glass mode / resize survive restarts.
+        self.settings = load_settings()
+
         # Compute DPI scale once and apply it consistently across the UI.
         # tkinter without explicit scaling renders at physical pixels when
         # the process is DPI-aware, which makes everything tiny on hi-res
@@ -449,6 +480,10 @@ class PeekyAgent:
         global BUBBLE_W
         BUBBLE_W = int(self.BASE_BUBBLE_W * self._scale)
 
+        # Ephemeral RAG — single-document in-memory store.
+        self.rag = EphemeralRAG(embed_model=self.settings.get(
+            "embed_model", "nomic-embed-text"))
+
         self.root = tk.Tk()
         # tk's default scaling is 1.333 for 96 DPI. Adjust proportionally.
         self.root.tk.call("tk", "scaling", self._scale * 1.333)
@@ -460,7 +495,7 @@ class PeekyAgent:
                 log.warning("iconbitmap: %s", e)
         self.root.overrideredirect(True)
         self.root.wm_attributes("-topmost", True)
-        self.root.wm_attributes("-alpha", 0.96)
+        self.root.wm_attributes("-alpha", float(self.settings.get("alpha", 0.96)))
         self.root.configure(bg=BG)
 
         self.state = "idle"
@@ -498,8 +533,8 @@ class PeekyAgent:
         self._build_menu()
 
         self.root.update_idletasks()
-        hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
-        self.root.after(80, lambda: round_corners(hwnd))
+        self._hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+        self.root.after(80, lambda: round_corners(self._hwnd))
 
         self.root.bind("<Escape>", self._on_escape)
 
@@ -592,7 +627,8 @@ class PeekyAgent:
         bg = BG if on else SURFACE
         frame.config(bg=bg)
         for ch in frame.winfo_children():
-            ch.config(bg=bg)
+            try: ch.config(bg=bg)
+            except Exception: pass
 
     def _coach_hover(self, on: bool):
         if not self._coaching:
@@ -679,6 +715,16 @@ class PeekyAgent:
         elif self.state == "recording":
             self._stop_recording()
 
+    # === Theme / Settings / RAG ===
+
+    def _apply_settings_live(self, new: dict):
+        if new.get("embed_model") != self.settings.get("embed_model"):
+            self.rag.embed_model = new.get("embed_model", "nomic-embed-text")
+        self.settings = dict(new)
+
+    def _open_settings(self):
+        SettingsDialog.open(self.root, self.settings, self._apply_settings_live)
+
     # === Right-click menu ===
 
     def _build_menu(self):
@@ -690,12 +736,53 @@ class PeekyAgent:
         self.menu.add_command(label="📖  History",       command=self._show_history)
         self.menu.add_command(label="🗑  Clear context", command=self._clear_history)
         self.menu.add_separator()
+        self.menu.add_command(label="📎  Attach document…", command=self._attach_doc)
+        self.menu.add_command(label="🧹  Clear attachment", command=self._clear_rag)
+        self.menu.add_separator()
+        self.menu.add_command(label="⚙  Settings…",     command=self._open_settings)
         self.menu.add_command(label="📄  Open log",      command=lambda: os.startfile(LOG_FILE))
         self.menu.add_separator()
         self.menu.add_command(label="✕  Quit",           command=self._quit)
 
     def _show_menu(self, e):
+        # Refresh attachment label so the user can see what's currently loaded.
+        try:
+            status = self.rag.status() or "📎  Attach document…"
+            label = f"📎  {self.rag.filename} ({len(self.rag.chunks)} chunks)" \
+                if self.rag.is_active() else "📎  Attach document…"
+            self.menu.entryconfigure(3, label=label)
+        except Exception:
+            pass
         self.menu.tk_popup(e.x_root, e.y_root)
+
+    # === Ephemeral RAG ===
+
+    def _attach_doc(self):
+        path = filedialog.askopenfilename(
+            parent=self.root,
+            title="Attach a document for this session",
+            filetypes=[("Documents", "*.txt *.md *.pdf *.log *.csv *.json *.rst"),
+                       ("All files", "*.*")])
+        if not path:
+            return
+        self._set_status(f"Reading {os.path.basename(path)}…")
+        threading.Thread(target=self._attach_doc_worker,
+                         args=(path,), daemon=True).start()
+
+    def _attach_doc_worker(self, path: str):
+        chunk_size = int(self.settings.get("rag_chunk", 600))
+        ok, msg = self.rag.attach(path, chunk_size=chunk_size)
+        self._set_status(msg)
+        self.root.after(3500, lambda: self._set_state("idle"))
+
+    def _clear_rag(self):
+        if not self.rag.is_active():
+            self._set_status("No attachment")
+        else:
+            name = self.rag.filename
+            self.rag.clear()
+            self._set_status(f"Cleared {name}")
+        self.root.after(2000, lambda: self._set_state("idle"))
 
     def _copy_last(self):
         if self.bubble._last_answer:
@@ -720,6 +807,8 @@ class PeekyAgent:
             if self.ffmpeg_proc and self.ffmpeg_proc.poll() is None:
                 self.ffmpeg_proc.kill()
             pygame.mixer.quit()
+            # Ephemeral RAG dies with the process — make it explicit.
+            self.rag.clear()
         except: pass
         self.root.destroy()
 
@@ -806,32 +895,33 @@ class PeekyAgent:
                      pady=24).pack()
         else:
             for entry in reversed(data):
-                card = tk.Frame(inner, bg=SURFACE, bd=0,
-                                highlightbackground=BORDER, highlightthickness=1)
-                card.pack(fill="x", pady=3, padx=2)
-
                 icon = ICONS.get(entry.get("mode", ""), "💬")
                 ts   = entry.get("ts", "")
-                user = entry.get("user", "")
-                smry = entry.get("summary", "")
+                user = entry.get("user", "").strip()
+                smry = entry.get("summary", "").strip()
 
-                top = tk.Frame(card, bg=SURFACE)
-                top.pack(fill="x", padx=10, pady=(6, 2))
-                tk.Label(top, text=f"{icon}  {ts}",
-                         font=("Segoe UI", 8), bg=SURFACE, fg=TEXT_LO).pack(side="left")
+                row = tk.Frame(inner, bg=SURFACE, cursor="hand2")
+                row.pack(fill="x", pady=1, padx=2)
 
-                if user:
-                    u = user[:72] + ("..." if len(user) > 72 else "")
-                    tk.Label(card, text=f"> {u}",
-                             font=("Segoe UI", 9, "bold"), bg=SURFACE, fg=TEXT_HI,
-                             anchor="w", wraplength=370, justify="left",
-                             padx=10).pack(fill="x")
-                if smry:
-                    s = smry[:140] + ("..." if len(smry) > 140 else "")
-                    tk.Label(card, text=s,
-                             font=("Segoe UI", 9), bg=SURFACE, fg=TEXT_LO,
-                             anchor="w", wraplength=370, justify="left",
-                             padx=10, pady=(0, 6)).pack(fill="x")
+                # single compact line: icon · timestamp · question snippet
+                q_raw   = user or smry or "—"
+                q_short = q_raw[:60] + ("…" if len(q_raw) > 60 else "")
+                line = tk.Label(row,
+                                text=f"{icon}  {ts}    {q_short}",
+                                font=("Segoe UI", 9), bg=SURFACE, fg=TEXT_HI,
+                                anchor="w", padx=8, pady=5)
+                line.pack(fill="x")
+
+                # hover highlight
+                def _on(w, _): w.config(bg=BG); [c.config(bg=BG) for c in w.winfo_children()]
+                def _off(w, _): w.config(bg=SURFACE); [c.config(bg=SURFACE) for c in w.winfo_children()]
+                row.bind("<Enter>", lambda e, w=row: _on(w, e))
+                row.bind("<Leave>", lambda e, w=row: _off(w, e))
+                line.bind("<Enter>", lambda e, w=row: _on(w, e))
+                line.bind("<Leave>", lambda e, w=row: _off(w, e))
+
+                # thin separator
+                tk.Frame(inner, bg=BORDER, height=1).pack(fill="x", padx=4)
 
         tf = tk.Frame(win, bg=BG)
         tf.pack(pady=(4, 12))
@@ -855,7 +945,7 @@ class PeekyAgent:
 
         sw = self.root.winfo_screenwidth()
         sh = self.root.winfo_screenheight()
-        w, h = 440, 520
+        w, h = 480, min(680, sh - 100)
         win.geometry(f"{w}x{h}+{(sw-w)//2}+{(sh-h)//2}")
         win.update_idletasks()
         hwnd = ctypes.windll.user32.GetParent(win.winfo_id())
@@ -1460,7 +1550,20 @@ class PeekyAgent:
     def _ask_ollama(self, user_text: str, img_b64, mode: str = "voice"):
         self._set_state("thinking")
 
-        msg = {"role": "user", "content": user_text}
+        # Ephemeral RAG: if a document is attached, retrieve top-K chunks and
+        # prepend them as context. We only augment the outgoing message — the
+        # history we keep in self.history stores the original user_text so
+        # follow-up turns don't drag the (long) context along forever.
+        sent_text = user_text
+        if self.rag.is_active() and not img_b64:
+            try:
+                k = int(self.settings.get("rag_topk", 4))
+                sent_text = self.rag.augment_prompt(user_text, k=k)
+                self._set_status(f"Thinking · using {self.rag.filename}")
+            except Exception as e:
+                log.warning("RAG augmentation failed: %s", e)
+
+        msg = {"role": "user", "content": sent_text}
 
         if img_b64:
             img_bytes = self._encode_for_ollama(img_b64)
@@ -1472,10 +1575,17 @@ class PeekyAgent:
         if "images" in msg:
             messages = [{"role": "system", "content": SYSTEM_PROMPT}, msg]
         else:
-            self.history.append(msg)
+            # Keep the lean original prompt in long-term history (so follow-up
+            # turns don't repeatedly drag the RAG excerpts along), but send the
+            # augmented version for THIS call only.
+            self.history.append({"role": "user", "content": user_text})
             if len(self.history) > MAX_HISTORY * 2:
                 self.history = self.history[-MAX_HISTORY * 2:]
-            messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.history
+            messages = (
+                [{"role": "system", "content": SYSTEM_PROMPT}]
+                + self.history[:-1]
+                + [msg]
+            )
 
         try:
             answer = self._ollama_chat(messages)
