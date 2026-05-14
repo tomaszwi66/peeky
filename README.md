@@ -226,6 +226,10 @@ coach_state.json     transient state during a Video Coach session
 
 **Edge-tts voice does not play.** Online TTS needs a working internet connection. If unavailable, Peeky falls back to a SAPI voice. Install or enable an English voice in Windows speech settings.
 
+## Author
+
+Tomasz Wietrzykowski - [tomaszwi66.github.io](https://tomaszwi66.github.io/)
+
 ## License
 
 MIT. See `LICENSE`.
