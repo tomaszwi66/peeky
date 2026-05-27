@@ -18,7 +18,7 @@ This version brings three improvements over the original release:
 
 **Comming Soon:**
 <p align="center">
-  <img src="docs/assets/peeky_pro.png" alt="Pro" width="640" />
+  <img src="docs/assets/peeky-pro.png" alt="Pro" width="640" />
 </p>
 
 ## Features
