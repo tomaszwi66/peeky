@@ -16,6 +16,11 @@ This version brings three improvements over the original release:
 - **Type mode fixed.** Press Enter to send a typed question. Shift+Enter adds a new line.
 - **Settings panel.** Right-click the widget and open Settings to control how many document chunks are sent with each question.
 
+**Comming Soon:**
+<p align="center">
+  <img src="docs/assets/peeky_pro.png" alt="Pro" width="640" />
+</p>
+
 ## Features
 
 - **Voice conversations** in plain English. Speech recognition through Google when online, faster-whisper when offline. Voice replies through edge-tts when online, the Windows SAPI Zira voice when offline.
