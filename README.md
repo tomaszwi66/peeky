@@ -17,8 +17,8 @@ This version brings three improvements over the original release:
 - **Settings panel.** Right-click the widget and open Settings to control how many document chunks are sent with each question.
 
 **Comming Soon:**
-<p align="center">
-  <img src="docs/assets/peeky-pro.png" alt="Pro" width="640" />
+<p align="left">
+  <img src="docs/assets/peeky-pro.png" alt="Pro" width="100" />
 </p>
 
 ## Features
